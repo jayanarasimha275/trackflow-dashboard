@@ -1,0 +1,188 @@
+.card {
+  position: relative;
+
+  overflow: hidden;
+
+  background: var(--surface);
+
+  border: 1px solid var(--border);
+  border-radius: 18px;
+
+  padding: 24px;
+
+  transition:
+    transform 0.3s,
+    border-color 0.3s,
+    box-shadow 0.3s;
+}
+
+.card::before {
+  content: "";
+
+  position: absolute;
+
+  left: 0;
+  top: 0;
+
+  width: 100%;
+  height: 3px;
+
+  background: linear-gradient(90deg, #3b82f6, #60a5fa, #2563eb);
+
+  transform: scaleX(0);
+
+  transform-origin: left;
+
+  transition: transform 0.35s ease;
+}
+
+.card:hover {
+  transform: translateY(-6px);
+
+  border-color: rgba(59, 130, 246, 0.45);
+
+  box-shadow: 0 18px 35px rgba(0, 0, 0, 0.28);
+}
+
+.card:hover::before {
+  transform: scaleX(1);
+}
+
+.card:hover {
+  transform: translateY(-2px);
+
+  border-color: rgba(59, 130, 246, 0.5);
+  background: rgba(255, 255, 255, 0.018);
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.title {
+  margin: 0 0 8px;
+
+  color: var(--text-light);
+
+  font-size: 10px;
+  font-weight: 600;
+
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.header h2,
+.header strong {
+  margin: 0;
+
+  color: var(--text);
+
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.icon {
+  width: 38px;
+  height: 38px;
+
+  flex-shrink: 0;
+
+  display: grid;
+  place-items: center;
+
+  color: var(--primary);
+  background: rgba(59, 130, 246, 0.1);
+
+  border: 1px solid rgba(59, 130, 246, 0.12);
+  border-radius: 10px;
+}
+
+.icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.footer {
+  margin-top: 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.change {
+  padding: 6px 10px;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  color: #22c55e;
+  background: rgba(34, 197, 94, 0.1);
+
+  border: 1px solid rgba(34, 197, 94, 0.18);
+  border-radius: 999px;
+
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.live {
+  padding: 5px 10px;
+
+  color: var(--primary);
+  background: rgba(59, 130, 246, 0.1);
+
+  border: 1px solid rgba(59, 130, 246, 0.18);
+  border-radius: 999px;
+
+  font-size: 11px;
+  font-weight: 600;
+}
+
+@media (max-width: 760px) {
+  .card {
+    min-height: 108px;
+    padding: 16px;
+  }
+
+  .header h2,
+  .header strong {
+    font-size: 22px;
+  }
+}
+.cardBottom {
+  margin-top: 14px;
+
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.cardBottom .change {
+  flex: 1;
+
+  margin: 0;
+}
+
+.sparkline {
+  width: 92px;
+  height: 34px;
+
+  flex-shrink: 0;
+
+  overflow: hidden;
+}
+
+@media (max-width: 480px) {
+  .sparkline {
+    width: 78px;
+    height: 30px;
+  }
+}

@@ -1,0 +1,230 @@
+.sidebar {
+  width: 280px;
+  min-height: 100vh;
+
+  display: flex;
+  flex-direction: column;
+
+  background: linear-gradient(180deg, #0f172a, #111827);
+
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+
+  position: sticky;
+  top: 0;
+}
+
+.brand {
+  height: 82px;
+  padding: 0 24px;
+
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.brandIcon {
+  width: 48px;
+  height: 48px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: white;
+
+  font-size: 16px;
+  font-weight: 700;
+
+  background: linear-gradient(135deg, #2563eb, #3b82f6, #60a5fa);
+
+  border-radius: 14px;
+
+  box-shadow: 0 12px 30px rgba(37, 99, 235, 0.35);
+}
+
+.brandText h2 {
+  color: var(--text);
+
+  font-size: 19px;
+  font-weight: 700;
+}
+
+.brandText span {
+  color: var(--text-light);
+
+  font-size: 11px;
+}
+
+.menu {
+  flex: 1;
+
+  padding: 22px 16px;
+
+  overflow-y: auto;
+}
+
+.menuGroup {
+  margin-bottom: 28px;
+}
+
+.groupTitle {
+  margin-bottom: 10px;
+  padding: 0 12px;
+
+  color: var(--text-light);
+
+  font-size: 11px;
+  font-weight: 700;
+
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.link {
+  position: relative;
+
+  height: 46px;
+  padding: 0 14px;
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  color: var(--text-light);
+
+  border-radius: 12px;
+
+  text-decoration: none;
+
+  transition:
+    background 0.25s,
+    color 0.25s,
+    transform 0.25s;
+}
+
+.link:hover {
+  color: white;
+
+  background: rgba(255, 255, 255, 0.05);
+
+  transform: translateX(4px);
+}
+
+.link svg {
+  flex-shrink: 0;
+}
+
+.link.active {
+  color: white;
+
+  background: rgba(59, 130, 246, 0.12);
+
+  border: 1px solid rgba(59, 130, 246, 0.25);
+}
+
+.link.active::before {
+  content: "";
+
+  position: absolute;
+
+  left: -16px;
+
+  width: 4px;
+  height: 26px;
+
+  background: #3b82f6;
+
+  border-radius: 0 6px 6px 0;
+}
+
+.sidebarFooter {
+  padding: 18px;
+
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.storageCard {
+  padding: 18px;
+
+  background: rgba(255, 255, 255, 0.03);
+
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+}
+
+.storageLabel {
+  display: block;
+
+  color: var(--text-light);
+
+  font-size: 11px;
+
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.storageCard strong {
+  display: block;
+
+  margin-top: 10px;
+
+  color: white;
+
+  font-size: 17px;
+}
+
+.storageBar {
+  width: 100%;
+  height: 8px;
+
+  margin: 14px 0 10px;
+
+  overflow: hidden;
+
+  background: rgba(255, 255, 255, 0.05);
+
+  border-radius: 999px;
+}
+
+.storageBar span {
+  display: block;
+
+  height: 100%;
+
+  background: linear-gradient(90deg, #2563eb, #3b82f6, #60a5fa);
+
+  border-radius: inherit;
+}
+
+.storageCard small {
+  color: var(--text-light);
+
+  font-size: 11px;
+}
+
+@media (max-width: 1000px) {
+  .sidebar {
+    width: 88px;
+  }
+
+  .brandText,
+  .groupTitle,
+  .link span,
+  .sidebarFooter {
+    display: none;
+  }
+
+  .brand {
+    justify-content: center;
+  }
+
+  .link {
+    justify-content: center;
+  }
+
+  .link.active::before {
+    left: 0;
+  }
+}
