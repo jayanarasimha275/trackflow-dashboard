@@ -5,10 +5,22 @@ export default async function RedirectPage({ params }) {
     `${process.env.NEXT_PUBLIC_API_URL}/r/${params.shortCode}`,
     {
       redirect: "manual",
+      cache: "no-store",
     },
   );
 
-  console.log(response);
-
-  return <div>Loading...</div>;
+  return (
+    <pre>
+      {JSON.stringify(
+        {
+          status: response.status,
+          ok: response.ok,
+          redirected: response.redirected,
+          url: response.url,
+        },
+        null,
+        2,
+      )}
+    </pre>
+  );
 }
