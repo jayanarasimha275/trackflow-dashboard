@@ -2,22 +2,13 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import {
-  Copy,
-  ExternalLink,
-  MoreHorizontal,
-  Search,
-} from "lucide-react";
+import { Copy, ExternalLink, MoreHorizontal, Search } from "lucide-react";
 
 import { useLinks } from "@/context/LinksContext";
 
 export default function LinksTable() {
-  const {
-    links,
-    loaded,
-    updateLink,
-    deleteLink,
-  } = useLinks();
+  const { links, loaded, updateLink, deleteLink } = useLinks();
+  console.log("LinksTable received:", links);
 
   const [openMenuId, setOpenMenuId] = useState(null);
   const [search, setSearch] = useState("");
@@ -36,17 +27,11 @@ export default function LinksTable() {
     event.preventDefault();
     event.stopPropagation();
 
-    await navigator.clipboard.writeText(
-      `https://${shortUrl}`
-    );
+    await navigator.clipboard.writeText(`https://${shortUrl}`);
   }
 
   if (!loaded) {
-    return (
-      <div className="links-loading">
-        Loading links...
-      </div>
-    );
+    return <div className="links-loading">Loading links...</div>;
   }
 
   return (
@@ -58,19 +43,14 @@ export default function LinksTable() {
           <input
             type="search"
             value={search}
-            onChange={(event) =>
-              setSearch(event.target.value)
-            }
+            onChange={(event) => setSearch(event.target.value)}
             placeholder="Search by title or URL..."
             aria-label="Search links"
           />
         </div>
 
         <span className="result-count">
-          {filteredLinks.length}{" "}
-          {filteredLinks.length === 1
-            ? "link"
-            : "links"}
+          {filteredLinks.length} {filteredLinks.length === 1 ? "link" : "links"}
         </span>
       </div>
 
@@ -90,35 +70,27 @@ export default function LinksTable() {
             {filteredLinks.map((item) => (
               <tr key={item.id}>
                 <td>
-                  <Link
-                    href={`/links/${item.id}`}
-                    className="link-info"
-                  >
+                  <Link href={`/links/${item.id}`} className="link-info">
                     <strong>{item.title}</strong>
                     <span>{item.shortUrl}</span>
                   </Link>
                 </td>
 
                 <td>
-                  <span className="destination">
-                    {item.destination}
-                  </span>
+                  <span className="destination">{item.destination}</span>
                 </td>
 
                 <td>
                   <strong className="click-count">
-                    {Number(
-                      item.clicks
-                    ).toLocaleString()}
+                    {Number(item.clicks).toLocaleString()}
                   </strong>
                 </td>
 
                 <td>
                   <span
-                    className={`status ${item.status === "Active"
-                      ? "active"
-                      : "paused"
-                      }`}
+                    className={`status ${
+                      item.status === "Active" ? "active" : "paused"
+                    }`}
                   >
                     {item.status}
                   </span>
@@ -128,12 +100,7 @@ export default function LinksTable() {
                   <div className="actions">
                     <button
                       type="button"
-                      onClick={(event) =>
-                        copyLink(
-                          event,
-                          item.shortUrl
-                        )
-                      }
+                      onClick={(event) => copyLink(event, item.shortUrl)}
                       aria-label={`Copy ${item.title} link`}
                     >
                       <Copy size={16} />
@@ -166,10 +133,7 @@ export default function LinksTable() {
 
                     <strong>No links found</strong>
 
-                    <span>
-                      No tracked links match
-                      &quot;{search}&quot;.
-                    </span>
+                    <span>No tracked links match &quot;{search}&quot;.</span>
                   </div>
                 </td>
               </tr>
