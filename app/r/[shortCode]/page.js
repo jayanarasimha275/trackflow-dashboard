@@ -1,3 +1,14 @@
+import { redirect } from "next/navigation";
+
 export default async function RedirectPage({ params }) {
-  return <div>Short Code: {params.shortCode}</div>;
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/r/${params.shortCode}`,
+    {
+      redirect: "manual",
+    },
+  );
+
+  console.log(response);
+
+  return <div>Loading...</div>;
 }
