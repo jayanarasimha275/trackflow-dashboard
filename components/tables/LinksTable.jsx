@@ -67,75 +67,21 @@ export default function LinksTable() {
           </thead>
 
           <tbody>
+            {console.log("Rendering rows:", filteredLinks)}
+
             {filteredLinks.map((item) => (
               <tr key={item.id}>
-                <td>
-                  <Link href={`/links/${item.id}`} className="link-info">
-                    <strong>{item.title}</strong>
-                    <span>{item.shortUrl}</span>
-                  </Link>
-                </td>
-
-                <td>
-                  <span className="destination">{item.destination}</span>
-                </td>
-
-                <td>
-                  <strong className="click-count">
-                    {Number(item.clicks).toLocaleString()}
-                  </strong>
-                </td>
-
-                <td>
-                  <span
-                    className={`status ${
-                      item.status === "Active" ? "active" : "paused"
-                    }`}
-                  >
-                    {item.status}
-                  </span>
-                </td>
-
-                <td>
-                  <div className="actions">
-                    <button
-                      type="button"
-                      onClick={(event) => copyLink(event, item.shortUrl)}
-                      aria-label={`Copy ${item.title} link`}
-                    >
-                      <Copy size={16} />
-                    </button>
-
-                    <Link
-                      href={`/links/${item.id}`}
-                      aria-label={`View ${item.title}`}
-                    >
-                      <ExternalLink size={16} />
-                    </Link>
-
-                    <Link
-                      href={`/links/${item.id}/edit`}
-                      aria-label={`Edit ${item.title}`}
-                      title="Edit link"
-                    >
-                      <MoreHorizontal size={17} />
-                    </Link>
-                  </div>
-                </td>
+                <td>{item.title}</td>
+                <td>{item.destination}</td>
+                <td>{item.clicks}</td>
+                <td>{item.status}</td>
+                <td>OK</td>
               </tr>
             ))}
 
             {filteredLinks.length === 0 && (
               <tr>
-                <td colSpan="5">
-                  <div className="empty-search">
-                    <Search size={24} />
-
-                    <strong>No links found</strong>
-
-                    <span>No tracked links match &quot;{search}&quot;.</span>
-                  </div>
-                </td>
+                <td colSpan="5">No links</td>
               </tr>
             )}
           </tbody>
