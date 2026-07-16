@@ -7,8 +7,7 @@ import { Copy, ExternalLink, MoreHorizontal, Search } from "lucide-react";
 import { useLinks } from "@/context/LinksContext";
 
 export default function LinksTable() {
-  const { links, loaded, updateLink, deleteLink } = useLinks();
-  console.log("LinksTable received:", links);
+  const { links, loaded } = useLinks();
 
   const [openMenuId, setOpenMenuId] = useState(null);
   const [search, setSearch] = useState("");
@@ -33,7 +32,7 @@ export default function LinksTable() {
   if (!loaded) {
     return <div className="links-loading">Loading links...</div>;
   }
-
+  console.log("LinksTable rendered", filteredLinks);
   return (
     <div className="links-table-section">
       <div className="table-toolbar">
@@ -76,13 +75,52 @@ export default function LinksTable() {
                   </Link>
                 </td>
 
-                <td>{item.destination}</td>
+                <td>
+                  <span className="destination">{item.destination}</span>
+                </td>
 
-                <td>{item.clicks}</td>
+                <td>
+                  <strong className="click-count">
+                    {Number(item.clicks).toLocaleString()}
+                  </strong>
+                </td>
 
-                <td>{item.status}</td>
+                <td>
+                  <span
+                    className={`status ${
+                      item.status === "Active" ? "active" : "paused"
+                    }`}
+                  >
+                    {item.status}
+                  </span>
+                </td>
 
-                <td>OK</td>
+                <td>
+                  <div className="actions">
+                    <button
+                      type="button"
+                      onClick={(event) => copyLink(event, item.shortUrl)}
+                      aria-label={`Copy ${item.title} link`}
+                    >
+                      <Copy size={16} />
+                    </button>
+
+                    <Link
+                      href={`/links/${item.id}`}
+                      aria-label={`View ${item.title}`}
+                    >
+                      <ExternalLink size={16} />
+                    </Link>
+
+                    <Link
+                      href={`/links/${item.id}/edit`}
+                      aria-label={`Edit ${item.title}`}
+                      title="Edit link"
+                    >
+                      <MoreHorizontal size={17} />
+                    </Link>
+                  </div>
+                </td>
               </tr>
             ))}
 

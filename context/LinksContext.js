@@ -21,14 +21,12 @@ export function LinksProvider({ children }) {
     try {
       const result = await fetchAllLinks();
 
-      console.log("✅ API Result:", result);
-
       if (result.success) {
         const formattedLinks = result.data.map((link) => ({
           id: link.id,
           title: link.title,
           alias: link.shortCode,
-          shortUrl: `trackflow.io/${link.shortCode}`,
+          shortUrl: `${window.location.origin}/r/${link.shortCode}`,
           destination: link.destinationUrl,
 
           clicks: link.clicks,
@@ -46,13 +44,7 @@ export function LinksProvider({ children }) {
           },
         }));
 
-        console.log("✅ Formatted Links:", formattedLinks);
-
         setLinks(formattedLinks);
-
-        console.log("✅ State updated with:", formattedLinks.length, "links");
-      } else {
-        console.log("❌ API success = false", result);
       }
     } catch (error) {
       console.error("❌ Failed to fetch links:", error);
@@ -67,8 +59,6 @@ export function LinksProvider({ children }) {
 
   async function createLink(linkData) {
     const result = await createLinkAPI(linkData);
-
-    console.log("✅ Created Link:", result);
 
     await fetchLinks();
 
