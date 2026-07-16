@@ -67,21 +67,28 @@ export default function LinksTable() {
           </thead>
 
           <tbody>
-            {console.log("Rendering rows:", filteredLinks)}
-
             {filteredLinks.map((item) => (
               <tr key={item.id}>
-                <td>{item.title}</td>
+                <td>
+                  <Link href={`/links/${item.id}`} className="link-info">
+                    <strong>{item.title}</strong>
+                    <span>{item.shortUrl}</span>
+                  </Link>
+                </td>
+
                 <td>{item.destination}</td>
+
                 <td>{item.clicks}</td>
+
                 <td>{item.status}</td>
+
                 <td>OK</td>
               </tr>
             ))}
 
             {filteredLinks.length === 0 && (
               <tr>
-                <td colSpan="5">No links</td>
+                <td colSpan="5">No links found</td>
               </tr>
             )}
           </tbody>
