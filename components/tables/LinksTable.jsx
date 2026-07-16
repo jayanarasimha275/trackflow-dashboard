@@ -69,10 +69,17 @@ export default function LinksTable() {
             {filteredLinks.map((item) => (
               <tr key={item.id}>
                 <td>
-                  <Link href={`/links/${item.id}`} className="link-info">
+                  <div className="link-info">
                     <strong>{item.title}</strong>
-                    <span>{item.shortUrl}</span>
-                  </Link>
+
+                    <a
+                      href={item.shortUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {item.shortUrl}
+                    </a>
+                  </div>
                 </td>
 
                 <td>
