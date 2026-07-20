@@ -38,12 +38,16 @@ export default function DashboardPage() {
     (total, link) => total + Number(link.visitors || 0),
     0,
   );
+  const uniqueClicks = links.reduce(
+    (total, link) => total + Number(link.uniqueClicks || 0),
+    0,
+  );
 
   const conversionRate =
     links.length > 0
       ? Math.round(
           links.reduce(
-            (total, link) => total + Number(link.conversion || 0),
+            (total, link) => total + Number(link.conversions || 0),
             0,
           ) / links.length,
         )
@@ -99,11 +103,11 @@ export default function DashboardPage() {
   );
   const deviceTotals = links.reduce(
     (totals, link) => {
-      totals.mobile += Number(link.devices?.mobile || 0);
+      totals.mobile += Number(link.mobileClicks || 0);
 
-      totals.desktop += Number(link.devices?.desktop || 0);
+      totals.desktop += Number(link.desktopClicks || 0);
 
-      totals.tablet += Number(link.devices?.tablet || 0);
+      totals.tablet += Number(link.tabletClicks || 0);
 
       return totals;
     },
@@ -202,12 +206,11 @@ export default function DashboardPage() {
           change="+12.5% vs previous period"
           icon={<MousePointerClick size={24} />}
         />
-
         <StatCard
-          title="Active Links"
-          value={loaded ? activeLinks : "..."}
-          change={`${links.length} total tracked links`}
-          icon={<Link2 size={24} />}
+          title="Unique Clicks"
+          value={loaded ? uniqueClicks.toLocaleString() : "..."}
+          change="+15.4% vs previous period"
+          icon={<MousePointerClick size={24} />}
         />
 
         <StatCard
@@ -397,7 +400,13 @@ export default function DashboardPage() {
             </div>
 
             <div className={styles.summaryItem}>
-              <span>Unique visitors</span>
+              <span>Unique Clicks</span>
+
+              <strong>{uniqueClicks.toLocaleString()}</strong>
+            </div>
+
+            <div className={styles.summaryItem}>
+              <span>Unique Visitors</span>
 
               <strong>{uniqueVisitors.toLocaleString()}</strong>
             </div>
@@ -426,12 +435,10 @@ export default function DashboardPage() {
             )
             .slice(0, 6)
             .map((link, index) => {
-              const devices = link.devices || {};
-
               const deviceEntries = [
-                ["Mobile", Number(devices.mobile || 0)],
-                ["Desktop", Number(devices.desktop || 0)],
-                ["Tablet", Number(devices.tablet || 0)],
+                ["Mobile", Number(link.mobileClicks || 0)],
+                ["Desktop", Number(link.desktopClicks || 0)],
+                ["Tablet", Number(link.tabletClicks || 0)],
               ];
 
               const [device] = deviceEntries.sort(
@@ -543,11 +550,13 @@ export default function DashboardPage() {
 
                 <th>Clicks</th>
 
-                <th>Unique visitors</th>
+                <th>Unique Clicks</th>
+
+                <th>Unique Visitors</th>
 
                 <th>Conversion</th>
 
-                <th>Top country</th>
+                <th>Top Country</th>
 
                 <th>Status</th>
               </tr>
@@ -569,7 +578,7 @@ export default function DashboardPage() {
 
                   <td>
                     <span className={styles.tableDestination}>
-                      {link.destination}
+                      {link.destinationUrl}
                     </span>
                   </td>
 
@@ -577,11 +586,21 @@ export default function DashboardPage() {
                     <strong>{Number(link.clicks || 0).toLocaleString()}</strong>
                   </td>
 
-                  <td>{Number(link.visitors || 0).toLocaleString()}</td>
+                  <td>
+                    <strong>
+                      {Number(link.uniqueClicks || 0).toLocaleString()}
+                    </strong>
+                  </td>
+
+                  <td>
+                    <strong>
+                      {Number(link.visitors || 0).toLocaleString()}
+                    </strong>
+                  </td>
 
                   <td>
                     <span className={styles.conversionValue}>
-                      {Number(link.conversion || 0)}%
+                      {Number(link.conversions || 0)}%
                     </span>
                   </td>
 
@@ -590,12 +609,10 @@ export default function DashboardPage() {
                   <td>
                     <span
                       className={`${styles.tableStatus} ${
-                        link.status === "Active"
-                          ? styles.tableActive
-                          : styles.tablePaused
+                        link.isActive ? styles.tableActive : styles.tablePaused
                       }`}
                     >
-                      {link.status}
+                      {link.isActive ? "Active" : "Paused"}
                     </span>
                   </td>
                 </tr>

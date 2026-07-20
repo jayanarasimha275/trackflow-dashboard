@@ -18,7 +18,7 @@ export default function LinksTable() {
     return (
       item.title.toLowerCase().includes(query) ||
       item.shortUrl.toLowerCase().includes(query) ||
-      item.destination.toLowerCase().includes(query)
+      item.destinationUrl.toLowerCase().includes(query)
     );
   });
 
@@ -60,6 +60,8 @@ export default function LinksTable() {
               <th>Link</th>
               <th>Destination</th>
               <th>Clicks</th>
+              <th>Unique Clicks</th>
+              <th>Unique Visitors</th>
               <th>Status</th>
               <th aria-label="Actions" />
             </tr>
@@ -73,17 +75,17 @@ export default function LinksTable() {
                     <strong>{item.title}</strong>
 
                     <a
-                      href={item.shortUrl}
+                      href={`http://localhost:3000/r/${item.shortCode}`}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      {item.shortUrl}
+                      {item.shortCode}
                     </a>
                   </div>
                 </td>
 
                 <td>
-                  <span className="destination">{item.destination}</span>
+                  <span className="destination">{item.destinationUrl}</span>
                 </td>
 
                 <td>
@@ -91,14 +93,23 @@ export default function LinksTable() {
                     {Number(item.clicks).toLocaleString()}
                   </strong>
                 </td>
+                <td>
+                  <strong className="click-count">
+                    {Number(item.uniqueClicks || 0).toLocaleString()}
+                  </strong>
+                </td>
+
+                <td>
+                  <strong className="click-count">
+                    {Number(item.visitors || 0).toLocaleString()}
+                  </strong>
+                </td>
 
                 <td>
                   <span
-                    className={`status ${
-                      item.status === "Active" ? "active" : "paused"
-                    }`}
+                    className={`status ${item.isActive ? "active" : "paused"}`}
                   >
-                    {item.status}
+                    {item.isActive ? "Active" : "Paused"}
                   </span>
                 </td>
 
@@ -133,7 +144,7 @@ export default function LinksTable() {
 
             {filteredLinks.length === 0 && (
               <tr>
-                <td colSpan="5">No links found</td>
+                <td colSpan="7">No links found</td>
               </tr>
             )}
           </tbody>

@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   Link2,
   ChartColumn,
   User,
   Settings,
+  LogOut,
 } from "lucide-react";
 
 import styles from "./Sidebar.module.css";
@@ -60,6 +61,14 @@ const menuItems = [
 export default function Sidebar() {
   const pathname = usePathname();
 
+  const router = useRouter();
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+
+    router.replace("/login");
+  };
   return (
     <aside className={styles.sidebar}>
       <div className={styles.brand}>
@@ -112,6 +121,10 @@ export default function Sidebar() {
 
           <small>24% used</small>
         </div>
+        <button onClick={handleLogout} className={styles.logoutButton}>
+          <LogOut size={18} />
+          <span>Logout</span>
+        </button>
       </div>
     </aside>
   );

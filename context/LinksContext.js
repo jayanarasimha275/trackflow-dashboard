@@ -23,25 +23,7 @@ export function LinksProvider({ children }) {
 
       if (result.success) {
         const formattedLinks = result.data.map((link) => ({
-          id: link.id,
-          title: link.title,
-          alias: link.shortCode,
-          shortUrl: `${window.location.origin}/r/${link.shortCode}`,
-          destination: link.destinationUrl,
-
-          clicks: link.clicks,
-          visitors: link.visitors,
-          conversion: link.conversions,
-
-          topCountry: link.topCountry,
-
-          status: link.isActive ? "Active" : "Paused",
-
-          devices: {
-            mobile: link.mobileClicks || 0,
-            desktop: link.desktopClicks || 0,
-            tablet: link.tabletClicks || 0,
-          },
+          ...link,
         }));
 
         setLinks(formattedLinks);

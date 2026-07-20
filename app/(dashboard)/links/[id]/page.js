@@ -146,8 +146,8 @@ export default function LinkDetailsPage({ params }) {
   }
 
   const totalClicks = clicks.length;
-
-  const uniqueVisitors = clicks.filter((click) => click.isUnique).length;
+  const uniqueClicks = clicks.filter((click) => click.isUnique).length;
+  const repeatClicks = totalClicks - uniqueClicks;
 
   const isNewLink = totalClicks === 0;
 
@@ -180,17 +180,16 @@ export default function LinkDetailsPage({ params }) {
             </button>
 
             <a
-              href={trackedLink.destination}
+              href={trackedLink.destinationUrl}
               target="_blank"
               rel="noreferrer"
-              aria-label="Open destination link"
             >
               <ExternalLink size={15} />
             </a>
           </div>
 
           <p className={styles.destination}>
-            Redirects to {trackedLink.destination}
+            Redirects to {trackedLink.destinationUrl}
           </p>
         </div>
         <div style={{ display: "flex", gap: "10px" }}>
@@ -252,12 +251,14 @@ export default function LinkDetailsPage({ params }) {
           </div>
 
           <div>
-            <span>Unique visitors</span>
+            <span>Unique Clicks</span>
 
-            <strong>{uniqueVisitors.toLocaleString()}</strong>
+            <strong>{uniqueClicks.toLocaleString()}</strong>
 
             <small>
-              {isNewLink ? "No visitor data yet" : "70.2% unique traffic"}
+              {isNewLink
+                ? "No unique clicks yet"
+                : `${Math.round((uniqueClicks / totalClicks) * 100)}% unique traffic`}
             </small>
           </div>
         </article>
@@ -268,12 +269,14 @@ export default function LinkDetailsPage({ params }) {
           </div>
 
           <div>
-            <span>Conversion rate</span>
+            <span>Repeat Clicks</span>
 
-            <strong>{trackedLink.conversion}%</strong>
+            <strong>{repeatClicks.toLocaleString()}</strong>
 
             <small>
-              {isNewLink ? "No conversion data yet" : "+3.2% this month"}
+              {isNewLink
+                ? "No repeat clicks yet"
+                : `${Math.round((repeatClicks / totalClicks) * 100)}% returning traffic`}
             </small>
           </div>
         </article>
@@ -289,7 +292,11 @@ export default function LinkDetailsPage({ params }) {
             <strong>{trackedLink.topCountry}</strong>
 
             <small>
-              {isNewLink ? "No location data yet" : "42% of total traffic"}
+              {isNewLink
+                ? "No location data yet"
+                : `${Math.round(
+                    (uniqueClicks / totalClicks) * 100,
+                  )}% tracked traffic`}
             </small>
           </div>
         </article>

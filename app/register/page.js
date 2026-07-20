@@ -1,15 +1,19 @@
 "use client";
-import styles from "./Login.module.css";
+
 import { useEffect, useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
+import styles from "./Register.module.css";
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const router = useRouter();
 
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
   const [showPassword, setShowPassword] = useState(false);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -20,23 +24,26 @@ export default function LoginPage() {
       router.replace("/dashboard");
     }
   }, [router]);
-  const handleLogin = async (e) => {
+
+  const handleRegister = async (e) => {
     e.preventDefault();
 
-    setError("");
     setLoading(true);
+    setError("");
 
     try {
       const response = await fetch(
-        "https://linktrackback.onrender.com/api/auth/login",
+        "https://linktrackback.onrender.com/api/auth/register",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
+            name,
             email,
             password,
+            role: "PUBLISHER",
           }),
         },
       );
@@ -47,10 +54,9 @@ export default function LoginPage() {
         throw new Error(result.message);
       }
 
-      localStorage.setItem("token", result.data.token);
-      localStorage.setItem("user", JSON.stringify(result.data.user));
+      alert("Registration Successful!");
 
-      router.push("/dashboard");
+      router.push("/login");
     } catch (err) {
       setError(err.message);
     } finally {
@@ -63,17 +69,30 @@ export default function LoginPage() {
       <div className={styles.card}>
         <div className={styles.logo}>TF</div>
 
-        <h1 className={styles.title}>Welcome Back</h1>
+        <h1 className={styles.title}>Create Account</h1>
 
-        <p className={styles.subtitle}>Sign in to your TrackFlow account</p>
+        <p className={styles.subtitle}>Register for TrackFlow</p>
 
-        <form className={styles.form} onSubmit={handleLogin}>
+        <form className={styles.form} onSubmit={handleRegister}>
           <div className={styles.group}>
-            <label className={styles.label}>Email Address</label>
+            <label className={styles.label}>Name</label>
+
+            <input
+              type="text"
+              placeholder="John Doe"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              className={styles.input}
+            />
+          </div>
+
+          <div className={styles.group}>
+            <label className={styles.label}>Email</label>
 
             <input
               type="email"
-              placeholder="admin@example.com"
+              placeholder="john@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -87,7 +106,7 @@ export default function LoginPage() {
             <div className={styles.passwordBox}>
               <input
                 type={showPassword ? "text" : "password"}
-                placeholder="••••••••"
+                placeholder="********"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -107,17 +126,17 @@ export default function LoginPage() {
           {error && <div className={styles.error}>{error}</div>}
 
           <button type="submit" disabled={loading} className={styles.button}>
-            {loading ? "Signing In..." : "Sign In"}
+            {loading ? "Creating Account..." : "Register"}
           </button>
 
           <div className={styles.footer}>
-            Don't have an account?{" "}
+            Already have an account?{" "}
             <button
               type="button"
               className={styles.link}
-              onClick={() => router.push("/register")}
+              onClick={() => router.push("/login")}
             >
-              Register
+              Sign In
             </button>
           </div>
         </form>
