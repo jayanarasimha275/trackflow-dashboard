@@ -9,6 +9,7 @@ import {
   User,
   Settings,
   LogOut,
+  ScanLine,
 } from "lucide-react";
 
 import styles from "./Sidebar.module.css";
@@ -37,6 +38,11 @@ const menuItems = [
         name: "Links",
         href: "/links",
         icon: Link2,
+      },
+      {
+        name: "Pixels",
+        href: "/pixels",
+        icon: ScanLine,
       },
     ],
   },

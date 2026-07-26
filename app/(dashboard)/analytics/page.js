@@ -2,11 +2,8 @@
 
 import { useState } from "react";
 
-import {
-  CalendarDays,
-  Download,
-  Filter,
-} from "lucide-react";
+import { CalendarDays, Download, Filter } from "lucide-react";
+import { useDashboard } from "@/context/DashboardContext";
 
 import { useLinks } from "@/context/LinksContext";
 import ClickChart from "@/components/charts/ClickChart";
@@ -15,149 +12,100 @@ import styles from "./Analytics.module.css";
 
 export default function AnalyticsPage() {
   const { links } = useLinks();
+  const { dashboard } = useDashboard();
 
   const [period, setPeriod] = useState("30days");
 
-  const totalClicks = links.reduce(
-    (sum, link) => sum + Number(link.clicks || 0),
-    0
-  );
+  const summary = dashboard?.summary || {};
 
-  const totalVisitors = links.reduce(
-    (sum, link) => sum + Number(link.visitors || 0),
-    0
-  );
-
-  const totalConversions = links.reduce(
-    (sum, link) => sum + Number(link.conversion || 0),
-    0
-  );
-
-  const averageCTR =
-    links.length > 0
-      ? Math.round(totalConversions / links.length)
-      : 0;
-
+  const totalClicks = summary.totalClicks || 0;
+  const totalVisitors = summary.totalVisitors || 0;
+  const totalConversions = summary.totalConversions || 0;
+  const averageCTR = summary.conversionRate || 0;
   /* ---------------- Countries ---------------- */
 
-  const countryClicks = {};
-
-  links.forEach((link) => {
-    const country = link.topCountry || "Unknown";
-
-    countryClicks[country] =
-      (countryClicks[country] || 0) +
-      Number(link.clicks || 0);
-  });
-
-  const totalCountryClicks = Object.values(
-    countryClicks
-  ).reduce((a, b) => a + b, 0);
-
   const countryFlags = {
-    India: "🇮🇳",
-    "United States": "🇺🇸",
-    Germany: "🇩🇪",
-    Japan: "🇯🇵",
-    Canada: "🇨🇦",
-    Australia: "🇦🇺",
+    IN: "🇮🇳",
+    US: "🇺🇸",
+    GB: "🇬🇧",
+    DE: "🇩🇪",
+    FR: "🇫🇷",
+    CA: "🇨🇦",
+    AU: "🇦🇺",
+    JP: "🇯🇵",
   };
 
-  const countries = Object.entries(countryClicks)
-    .map(([name, clicks]) => ({
-      name,
-      flag: countryFlags[name] || "🌍",
+  const totalCountryClicks =
+    dashboard?.countries?.reduce(
+      (total, country) => total + country.clicks,
+      0,
+    ) || 0;
+
+  const countries =
+    dashboard?.countries?.map((country) => ({
+      ...country,
+      flag: countryFlags[country.name] || "🌍",
       percent:
         totalCountryClicks > 0
-          ? Math.round(
-            (clicks / totalCountryClicks) * 100
-          )
+          ? Math.round((country.clicks / totalCountryClicks) * 100)
           : 0,
-    }))
-    .sort((a, b) => b.percent - a.percent);
-
+    })) || [];
   /* ---------------- Devices ---------------- */
 
-  const deviceTotals = {
-    Mobile: 0,
-    Desktop: 0,
-    Tablet: 0,
-  };
+  const totalDeviceClicks =
+    dashboard?.devices?.reduce((total, device) => total + device.clicks, 0) ||
+    0;
 
-  links.forEach((link) => {
-    deviceTotals.Mobile += Number(
-      link.devices?.mobile || 0
-    );
-
-    deviceTotals.Desktop += Number(
-      link.devices?.desktop || 0
-    );
-
-    deviceTotals.Tablet += Number(
-      link.devices?.tablet || 0
-    );
-  });
-
-  const totalDevices = Object.values(
-    deviceTotals
-  ).reduce((a, b) => a + b, 0);
-
-  const devices = Object.entries(deviceTotals).map(
-    ([name, value]) => ({
-      name,
+  const devices =
+    dashboard?.devices?.map((device) => ({
+      name: device.name,
       percent:
-        totalDevices > 0
-          ? Math.round(
-            (value / totalDevices) * 100
-          )
+        totalDeviceClicks > 0
+          ? Math.round((device.clicks / totalDeviceClicks) * 100)
           : 0,
-    })
-  );
+    })) || [];
+  /* ---------------- Browsers ---------------- */
+
+  const totalBrowserClicks =
+    dashboard?.browsers?.reduce(
+      (total, browser) => total + browser.clicks,
+      0,
+    ) || 0;
+
+  const browsers =
+    dashboard?.browsers?.map((browser) => ({
+      name: browser.name,
+      percent:
+        totalBrowserClicks > 0
+          ? Math.round((browser.clicks / totalBrowserClicks) * 100)
+          : 0,
+    })) || [];
 
   /* ---------------- Referrers ---------------- */
 
-  const referrerTotals = {};
+  const totalReferrerClicks =
+    dashboard?.referrers?.reduce(
+      (total, referrer) => total + referrer.clicks,
+      0,
+    ) || 0;
 
-  links.forEach((link) => {
-    const source =
-      link.source?.trim() || "Direct";
-
-    referrerTotals[source] =
-      (referrerTotals[source] || 0) +
-      Number(link.clicks || 0);
-  });
-
-  const totalSources = Object.values(
-    referrerTotals
-  ).reduce((a, b) => a + b, 0);
-
-  const referrers = Object.entries(
-    referrerTotals
-  )
-    .map(([name, clicks]) => ({
-      name,
+  const referrers =
+    dashboard?.referrers?.map((referrer) => ({
+      name: referrer.name,
       percent:
-        totalSources > 0
-          ? Math.round(
-            (clicks / totalSources) * 100
-          )
+        totalReferrerClicks > 0
+          ? Math.round((referrer.clicks / totalReferrerClicks) * 100)
           : 0,
-    }))
-    .sort((a, b) => b.percent - a.percent);
-
+    })) || [];
   return (
     <div className={styles.analytics}>
       <div className={styles.header}>
         <div>
-          <p className={styles.eyebrow}>
-            ANALYTICS
-          </p>
+          <p className={styles.eyebrow}>ANALYTICS</p>
 
           <h1>Analytics</h1>
 
-          <p>
-            Monitor traffic and link performance.
-          </p>
+          <p>Monitor traffic and link performance.</p>
         </div>
 
         <div className={styles.actions}>
@@ -181,26 +129,22 @@ export default function AnalyticsPage() {
       <section className={styles.overview}>
         <div className={styles.metric}>
           <span>Total Clicks</span>
-          <strong>
-            {totalClicks.toLocaleString()}
-          </strong>
+          <strong>{totalClicks.toLocaleString()}</strong>
         </div>
 
         <div className={styles.metric}>
-          <span>Visitors</span>
-          <strong>
-            {totalVisitors.toLocaleString()}
-          </strong>
+          <span>Unique Visitors</span>
+          <strong>{totalVisitors.toLocaleString()}</strong>
         </div>
 
         <div className={styles.metric}>
           <span>Links</span>
-          <strong>{links.length}</strong>
+          <strong>{summary.totalLinks?.toLocaleString() || 0}</strong>
         </div>
 
         <div className={styles.metric}>
-          <span>Average CTR</span>
-          <strong>{averageCTR}%</strong>
+          <span>Avg Clicks / Link</span>
+          <strong>{summary.averageClicksPerLink || 0}</strong>
         </div>
       </section>
 
@@ -214,28 +158,17 @@ export default function AnalyticsPage() {
 
           <select
             value={period}
-            onChange={(event) =>
-              setPeriod(event.target.value)
-            }
+            onChange={(event) => setPeriod(event.target.value)}
           >
-            <option value="7days">
-              Last 7 Days
-            </option>
+            <option value="7days">Last 7 Days</option>
 
-            <option value="30days">
-              Last 30 Days
-            </option>
+            <option value="30days">Last 30 Days</option>
 
-            <option value="90days">
-              Last 90 Days
-            </option>
+            <option value="90days">Last 90 Days</option>
           </select>
         </div>
 
-        <ClickChart
-          period={period}
-          totalClicks={totalClicks}
-        />
+        <ClickChart period={period} clicks={dashboard?.chart || []} />
       </section>
 
       <section className={styles.bottomGrid}>
@@ -250,10 +183,7 @@ export default function AnalyticsPage() {
           </div>
 
           {countries.map((country) => (
-            <div
-              className={styles.progressItem}
-              key={country.name}
-            >
+            <div className={styles.progressItem} key={country.name}>
               <span>
                 {country.flag} {country.name}
               </span>
@@ -266,9 +196,7 @@ export default function AnalyticsPage() {
                 />
               </div>
 
-              <strong>
-                {country.percent}%
-              </strong>
+              <strong>{country.percent}%</strong>
             </div>
           ))}
         </div>
@@ -284,10 +212,7 @@ export default function AnalyticsPage() {
           </div>
 
           {devices.map((device) => (
-            <div
-              className={styles.progressItem}
-              key={device.name}
-            >
+            <div className={styles.progressItem} key={device.name}>
               <span>{device.name}</span>
 
               <div className={styles.progress}>
@@ -298,9 +223,33 @@ export default function AnalyticsPage() {
                 />
               </div>
 
-              <strong>
-                {device.percent}%
-              </strong>
+              <strong>{device.percent}%</strong>
+            </div>
+          ))}
+        </div>
+        {/* Browsers */}
+        <div className={styles.infoCard}>
+          <div className={styles.cardHeader}>
+            <div>
+              <h2>Browsers</h2>
+
+              <p>Visitor browsers</p>
+            </div>
+          </div>
+
+          {browsers.map((browser) => (
+            <div className={styles.progressItem} key={browser.name}>
+              <span>{browser.name}</span>
+
+              <div className={styles.progress}>
+                <span
+                  style={{
+                    width: `${browser.percent}%`,
+                  }}
+                />
+              </div>
+
+              <strong>{browser.percent}%</strong>
             </div>
           ))}
         </div>
@@ -316,10 +265,7 @@ export default function AnalyticsPage() {
           </div>
 
           {referrers.map((referrer) => (
-            <div
-              className={styles.progressItem}
-              key={referrer.name}
-            >
+            <div className={styles.progressItem} key={referrer.name}>
               <span>{referrer.name}</span>
 
               <div className={styles.progress}>
@@ -330,9 +276,7 @@ export default function AnalyticsPage() {
                 />
               </div>
 
-              <strong>
-                {referrer.percent}%
-              </strong>
+              <strong>{referrer.percent}%</strong>
             </div>
           ))}
         </div>

@@ -21,74 +21,6 @@ import ClickHistory from "@/components/analytics/ClickHistory";
 
 import styles from "./LinkDetails.module.css";
 
-const countries = [
-  {
-    name: "India",
-    flag: "🇮🇳",
-    clicks: "1,842",
-    percentage: 42,
-  },
-  {
-    name: "United States",
-    flag: "🇺🇸",
-    clicks: "982",
-    percentage: 24,
-  },
-  {
-    name: "Germany",
-    flag: "🇩🇪",
-    clicks: "624",
-    percentage: 16,
-  },
-  {
-    name: "Japan",
-    flag: "🇯🇵",
-    clicks: "438",
-    percentage: 10,
-  },
-];
-
-const devices = [
-  {
-    name: "Mobile",
-    percentage: 58,
-    icon: Smartphone,
-  },
-  {
-    name: "Desktop",
-    percentage: 34,
-    icon: Monitor,
-  },
-  {
-    name: "Tablet",
-    percentage: 8,
-    icon: Tablet,
-  },
-];
-
-const referrers = [
-  {
-    name: "Direct",
-    clicks: "1,826",
-    percentage: "42%",
-  },
-  {
-    name: "Instagram",
-    clicks: "1,024",
-    percentage: "24%",
-  },
-  {
-    name: "GitHub",
-    clicks: "842",
-    percentage: "19%",
-  },
-  {
-    name: "LinkedIn",
-    clicks: "618",
-    percentage: "15%",
-  },
-];
-
 export default function LinkDetailsPage({ params }) {
   const { id } = use(params);
 
@@ -98,6 +30,7 @@ export default function LinkDetailsPage({ params }) {
   const trackedLink = getLink(id);
 
   const [clicks, setClicks] = useState([]);
+  const [period, setPeriod] = useState("7days");
   useEffect(() => {
     async function loadClicks() {
       try {
@@ -148,8 +81,101 @@ export default function LinkDetailsPage({ params }) {
   const totalClicks = clicks.length;
   const uniqueClicks = clicks.filter((click) => click.isUnique).length;
   const repeatClicks = totalClicks - uniqueClicks;
+  const conversions = Number(trackedLink?.conversions || 0);
+
+  const conversionRate =
+    totalClicks > 0
+      ? ((conversions / totalClicks) * 100).toFixed(2)
+      : "0.00";
 
   const isNewLink = totalClicks === 0;
+  /* ---------------- Countries ---------------- */
+
+  const countryCounts = {};
+
+  clicks.forEach((click) => {
+    const country = click.country || "Unknown";
+    countryCounts[country] = (countryCounts[country] || 0) + 1;
+  });
+
+  const totalCountryClicks = clicks.length;
+
+  const countryFlags = {
+    India: "🇮🇳",
+    "United States": "🇺🇸",
+    Germany: "🇩🇪",
+    Japan: "🇯🇵",
+    Canada: "🇨🇦",
+    Australia: "🇦🇺",
+  };
+
+  const countries = Object.entries(countryCounts)
+    .map(([name, count]) => ({
+      name,
+      flag: countryFlags[name] || "🌍",
+      clicks: count,
+      percentage:
+        totalCountryClicks > 0
+          ? Math.round((count / totalCountryClicks) * 100)
+          : 0,
+    }))
+    .sort((a, b) => b.clicks - a.clicks);
+  /* ---------------- Devices ---------------- */
+
+  const deviceCounts = {
+    Mobile: 0,
+    Desktop: 0,
+    Tablet: 0,
+  };
+
+  clicks.forEach((click) => {
+    const device = click.deviceType || "Desktop";
+
+    if (device.toLowerCase() === "mobile") {
+      deviceCounts.Mobile++;
+    } else if (device.toLowerCase() === "tablet") {
+      deviceCounts.Tablet++;
+    } else {
+      deviceCounts.Desktop++;
+    }
+  });
+
+  const devices = Object.entries(deviceCounts).map(([name, count]) => ({
+    name,
+    percentage: totalClicks > 0 ? Math.round((count / totalClicks) * 100) : 0,
+  }));
+  /* ---------------- Referrers ---------------- */
+
+  const referrerCounts = {};
+
+  clicks.forEach((click) => {
+    const referrer = click.referrer || "Direct";
+
+    referrerCounts[referrer] = (referrerCounts[referrer] || 0) + 1;
+  });
+
+  const referrers = Object.entries(referrerCounts)
+    .map(([name, count]) => ({
+      name,
+      clicks: count,
+      percentage: totalClicks > 0 ? Math.round((count / totalClicks) * 100) : 0,
+    }))
+    .sort((a, b) => b.clicks - a.clicks);
+  const browserCounts = {};
+
+  clicks.forEach((click) => {
+    const browser = click.browser || "Unknown";
+    browserCounts[browser] = (browserCounts[browser] || 0) + 1;
+  });
+
+  const browsers = Object.entries(browserCounts)
+    .map(([name, count]) => ({
+      name,
+      clicks: count,
+      percentage:
+        totalClicks > 0 ? Math.round((count / totalClicks) * 100) : 0,
+    }))
+    .sort((a, b) => b.clicks - a.clicks);
 
   return (
     <div className={styles.page}>
@@ -240,7 +266,9 @@ export default function LinkDetailsPage({ params }) {
             <strong>{totalClicks.toLocaleString()}</strong>
 
             <small>
-              {isNewLink ? "Waiting for first click" : "+18.4% this month"}
+              {isNewLink
+                ? "Waiting for first click"
+                : `${totalClicks.toLocaleString()} total tracked clicks`}
             </small>
           </div>
         </article>
@@ -269,14 +297,14 @@ export default function LinkDetailsPage({ params }) {
           </div>
 
           <div>
-            <span>Repeat Clicks</span>
+            <span>Conversions</span>
 
-            <strong>{repeatClicks.toLocaleString()}</strong>
+            <strong>{conversions.toLocaleString()}</strong>
 
             <small>
               {isNewLink
-                ? "No repeat clicks yet"
-                : `${Math.round((repeatClicks / totalClicks) * 100)}% returning traffic`}
+                ? "No conversions yet"
+                : `${conversionRate}% conversion rate`}
             </small>
           </div>
         </article>
@@ -287,16 +315,14 @@ export default function LinkDetailsPage({ params }) {
           </div>
 
           <div>
-            <span>Top country</span>
+            <span>Conversion Rate</span>
 
-            <strong>{trackedLink.topCountry}</strong>
+            <strong>{conversionRate}%</strong>
 
             <small>
               {isNewLink
-                ? "No location data yet"
-                : `${Math.round(
-                    (uniqueClicks / totalClicks) * 100,
-                  )}% tracked traffic`}
+                ? "No conversion data yet"
+                : `${conversions} conversion${conversions !== 1 ? "s" : ""}`}
             </small>
           </div>
         </article>
@@ -327,16 +353,17 @@ export default function LinkDetailsPage({ params }) {
                 <p>Traffic generated by {trackedLink.title}.</p>
               </div>
 
-              <select defaultValue="7days">
+              <select
+                value={period}
+                onChange={(e) => setPeriod(e.target.value)}
+              >
                 <option value="7days">Last 7 days</option>
-
                 <option value="30days">Last 30 days</option>
-
                 <option value="90days">Last 90 days</option>
               </select>
             </div>
 
-            <ClickChart clicks={clicks} />
+            <ClickChart period={period} clicks={clicks} />
             <ClickHistory clicks={clicks} />
           </section>
 
@@ -358,7 +385,10 @@ export default function LinkDetailsPage({ params }) {
                       <div>
                         <strong>{country.name}</strong>
 
-                        <span>{country.clicks} clicks</span>
+                        <span>
+                          {country.clicks} click
+                          {country.clicks !== 1 ? "s" : ""}
+                        </span>
                       </div>
                     </div>
 
@@ -390,7 +420,12 @@ export default function LinkDetailsPage({ params }) {
 
               <div className={styles.deviceList}>
                 {devices.map((device) => {
-                  const DeviceIcon = device.icon;
+                  const DeviceIcon =
+                    device.name === "Mobile"
+                      ? Smartphone
+                      : device.name === "Tablet"
+                        ? Tablet
+                        : Monitor;
 
                   return (
                     <div className={styles.deviceItem} key={device.name}>
@@ -439,16 +474,51 @@ export default function LinkDetailsPage({ params }) {
                     <div>
                       <strong>{referrer.name}</strong>
 
-                      <span>{referrer.clicks} clicks</span>
+                      <span>
+                        {referrer.clicks} click
+                        {referrer.clicks !== 1 ? "s" : ""}
+                      </span>
                     </div>
 
                     <strong className={styles.referrerPercentage}>
-                      {referrer.percentage}
+                      {referrer.percentage}%
                     </strong>
                   </div>
                 ))}
               </div>
-            </article>
+              </article>
+              <article className={styles.analyticsCard}>
+                <div className={styles.sectionHeader}>
+                  <div>
+                    <h2>Top browsers</h2>
+
+                    <p>Most-used browsers by your visitors.</p>
+                  </div>
+                </div>
+
+                <div className={styles.referrerList}>
+                  {browsers.map((browser) => (
+                    <div className={styles.referrerItem} key={browser.name}>
+                      <div className={styles.referrerIcon}>
+                        <Globe2 size={18} />
+                      </div>
+
+                      <div>
+                        <strong>{browser.name}</strong>
+
+                        <span>
+                          {browser.clicks} click
+                          {browser.clicks !== 1 ? "s" : ""}
+                        </span>
+                      </div>
+
+                      <strong className={styles.referrerPercentage}>
+                        {browser.percentage}%
+                      </strong>
+                    </div>
+                  ))}
+                </div>
+              </article>
           </section>
         </>
       )}

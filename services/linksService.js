@@ -1,9 +1,6 @@
+
+
 import request from "./api";
-
-export async function getLinks() {
-  return request("/links");
-}
-
 export async function createLink(linkData) {
   return request("/links", {
     method: "POST",
@@ -14,7 +11,6 @@ export async function createLink(linkData) {
     }),
   });
 }
-
 export async function getLink(id) {
   return request(`/links/${id}`);
 }
@@ -37,4 +33,7 @@ export async function deleteLink(id) {
   return request(`/links/${id}`, {
     method: "DELETE",
   });
+}
+export async function fetchAllLinks() {
+  return request("/links");
 }

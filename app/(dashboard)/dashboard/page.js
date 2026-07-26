@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import StatCard from "@/components/cards/StatCard";
 import ClickChart from "@/components/charts/ClickChart";
+import { useDashboard } from "@/context/DashboardContext";
 
 import {
   MousePointerClick,
@@ -24,129 +25,66 @@ import styles from "./Dashboard.module.css";
 
 export default function DashboardPage() {
   const { links, loaded } = useLinks();
+  const { dashboard, loading } = useDashboard();
+  console.log("Dashboard Links:", links);
+  console.log("Dashboard API:", dashboard);
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
 
   const [chartPeriod, setChartPeriod] = useState("7days");
 
-  const totalClicks = links.reduce(
-    (total, link) => total + Number(link.clicks || 0),
-    0,
-  );
-
   const activeLinks = links.filter((link) => link.status === "Active").length;
 
-  const uniqueVisitors = links.reduce(
-    (total, link) => total + Number(link.visitors || 0),
-    0,
-  );
-  const uniqueClicks = links.reduce(
-    (total, link) => total + Number(link.uniqueClicks || 0),
-    0,
-  );
+  const totalClicks = dashboard?.summary?.totalClicks ?? 0;
 
-  const conversionRate =
-    links.length > 0
-      ? Math.round(
-          links.reduce(
-            (total, link) => total + Number(link.conversions || 0),
-            0,
-          ) / links.length,
-        )
-      : 0;
+  const uniqueClicks = dashboard?.summary?.uniqueClicks ?? 0;
+
+  const uniqueVisitors = dashboard?.summary?.uniqueVisitors ?? 0;
+
+  const conversionRate = dashboard?.summary?.conversionRate ?? 0;
 
   const countryFlags = {
-    India: "🇮🇳",
-    "United States": "🇺🇸",
-    Germany: "🇩🇪",
-    Japan: "🇯🇵",
-    "United Kingdom": "🇬🇧",
-    Canada: "🇨🇦",
-    Australia: "🇦🇺",
-    France: "🇫🇷",
+    IN: "🇮🇳",
+    US: "🇺🇸",
+    GB: "🇬🇧",
+    DE: "🇩🇪",
+    FR: "🇫🇷",
+    CA: "🇨🇦",
+    AU: "🇦🇺",
+    JP: "🇯🇵",
   };
 
-  const countryClicks = links.reduce((countries, link) => {
-    const country = link.topCountry || "No data";
-    const clicks = Number(link.clicks || 0);
+  const totalCountryClicks =
+    dashboard?.countries?.reduce(
+      (total, country) => total + country.clicks,
+      0,
+    ) || 0;
 
-    if (country === "No data") {
-      return countries;
-    }
-
-    countries[country] = (countries[country] || 0) + clicks;
-
-    return countries;
-  }, {});
-
-  const totalCountryClicks = Object.values(countryClicks).reduce(
-    (total, clicks) => total + clicks,
-    0,
-  );
-
-  const topCountries = Object.entries(countryClicks)
-    .map(([name, clicks]) => ({
-      name,
-      flag: countryFlags[name] || "🌍",
-      clicks,
+  const topCountries =
+    dashboard?.countries?.map((country) => ({
+      ...country,
+      flag: countryFlags[country.name] || "🌍",
       value:
         totalCountryClicks > 0
-          ? Math.round((clicks / totalCountryClicks) * 100)
+          ? Math.round((country.clicks / totalCountryClicks) * 100)
           : 0,
-    }))
-    .sort(
-      (firstCountry, secondCountry) =>
-        secondCountry.clicks - firstCountry.clicks,
-    )
-    .slice(0, 5);
+    })) || [];
   const sortedLinks = [...links].sort(
     (firstLink, secondLink) =>
       Number(secondLink.clicks || 0) - Number(firstLink.clicks || 0),
   );
-  const deviceTotals = links.reduce(
-    (totals, link) => {
-      totals.mobile += Number(link.mobileClicks || 0);
-
-      totals.desktop += Number(link.desktopClicks || 0);
-
-      totals.tablet += Number(link.tabletClicks || 0);
-
-      return totals;
-    },
-    {
-      mobile: 0,
-      desktop: 0,
-      tablet: 0,
-    },
-  );
-
   const totalDeviceVisitors =
-    deviceTotals.mobile + deviceTotals.desktop + deviceTotals.tablet;
+    dashboard?.devices?.reduce((total, device) => total + device.clicks, 0) ||
+    0;
 
-  const deviceData = [
-    {
-      name: "Mobile",
-      visitors: deviceTotals.mobile,
+  const deviceData =
+    dashboard?.devices?.map((device) => ({
+      name: device.name,
+      visitors: device.clicks,
       value:
         totalDeviceVisitors > 0
-          ? Math.round((deviceTotals.mobile / totalDeviceVisitors) * 100)
+          ? Math.round((device.clicks / totalDeviceVisitors) * 100)
           : 0,
-    },
-    {
-      name: "Desktop",
-      visitors: deviceTotals.desktop,
-      value:
-        totalDeviceVisitors > 0
-          ? Math.round((deviceTotals.desktop / totalDeviceVisitors) * 100)
-          : 0,
-    },
-    {
-      name: "Tablet",
-      visitors: deviceTotals.tablet,
-      value:
-        totalDeviceVisitors > 0
-          ? Math.round((deviceTotals.tablet / totalDeviceVisitors) * 100)
-          : 0,
-    },
-  ];
+    })) || [];
 
   return (
     <div className={styles.dashboard}>
@@ -154,8 +92,7 @@ export default function DashboardPage() {
         <div>
           <p className={styles.eyebrow}>GOOD TO SEE YOU AGAIN 👋</p>
 
-          <h1>Welcome back, Narasimha</h1>
-
+          <h1>Welcome back, {user.name || "User"}</h1>
           <p className={styles.description}>
             You currently have <strong>{links.length}</strong> tracked{" "}
             {links.length === 1 ? "link" : "links"}, generating{" "}
@@ -301,7 +238,7 @@ export default function DashboardPage() {
             </select>
           </div>
 
-          <ClickChart period={chartPeriod} totalClicks={totalClicks} />
+          <ClickChart period={chartPeriod} clicks={dashboard?.chart || []} />
         </div>
 
         <div className={styles.topLinksPanel}>

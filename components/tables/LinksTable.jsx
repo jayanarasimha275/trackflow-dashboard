@@ -72,10 +72,12 @@ export default function LinksTable() {
               <tr key={item.id}>
                 <td>
                   <div className="link-info">
-                    <strong>{item.title}</strong>
+                    <Link href={`/links/${item.id}`}>
+                      <strong>{item.title}</strong>
+                    </Link>
 
                     <a
-                      href={`http://localhost:3000/r/${item.shortCode}`}
+                      href={`${window.location.origin}/r/${item.shortCode}`}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
@@ -107,9 +109,9 @@ export default function LinksTable() {
 
                 <td>
                   <span
-                    className={`status ${item.isActive ? "active" : "paused"}`}
+                    className={`status ${item.status === "Active" ? "active" : "paused"}`}
                   >
-                    {item.isActive ? "Active" : "Paused"}
+                    {item.status}
                   </span>
                 </td>
 

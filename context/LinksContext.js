@@ -3,9 +3,11 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
 import {
-  getLinks as fetchAllLinks,
+  fetchAllLinks,
   createLink as createLinkAPI,
   getLinkClicks,
+  updateLink as updateLinkAPI,
+  deleteLink as deleteLinkAPI,
 } from "@/services/linksService";
 
 const LinksContext = createContext(null);
@@ -19,8 +21,9 @@ export function LinksProvider({ children }) {
   // ==========================
   async function fetchLinks() {
     try {
-      const result = await fetchAllLinks();
+      const token = localStorage.getItem("token");
 
+      const result = await fetchAllLinks();
       if (result.success) {
         const formattedLinks = result.data.map((link) => ({
           ...link,
@@ -40,7 +43,27 @@ export function LinksProvider({ children }) {
   }, []);
 
   async function createLink(linkData) {
-    const result = await createLinkAPI(linkData);
+    const token = localStorage.getItem("token");
+
+    const result = await createLinkAPI(linkData, token);
+
+    await fetchLinks();
+
+    return result;
+  }
+  async function updateLink(id, data) {
+    const token = localStorage.getItem("token");
+
+    const result = await updateLinkAPI(id, data, token);
+
+    await fetchLinks();
+
+    return result;
+  }
+  async function deleteLink(id) {
+    const token = localStorage.getItem("token");
+
+    const result = await deleteLinkAPI(id, token);
 
     await fetchLinks();
 
@@ -51,14 +74,19 @@ export function LinksProvider({ children }) {
     return getLinkClicks(id);
   }
 
+  function getLink(id) {
+    return links.find((link) => String(link.id) === String(id));
+  }
   const value = {
     links,
     loaded,
     createLink,
+    updateLink,
+    deleteLink,
     fetchLinks,
     fetchLinkClicks,
+    getLink,
   };
-
   return (
     <LinksContext.Provider value={value}>{children}</LinksContext.Provider>
   );

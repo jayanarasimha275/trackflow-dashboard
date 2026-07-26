@@ -45,104 +45,48 @@ function CustomTooltip({ active, payload, label }) {
     </div>
   );
 }
+function createChartData(period, clicks) {
+  const days = period === "7days" ? 7 : period === "30days" ? 30 : 90;
 
-function createChartData(period, totalClicks) {
-  const total = Number(totalClicks || 0);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
-  if (period === "30days") {
-    const labels = [
-      "Day 1",
-      "Day 5",
-      "Day 10",
-      "Day 15",
-      "Day 20",
-      "Day 25",
-      "Day 30",
-    ];
+  const grouped = {};
 
-    const weights = [
-      0.07,
-      0.1,
-      0.11,
-      0.14,
-      0.16,
-      0.19,
-      0.23,
-    ];
+  // Create every day first
+  for (let i = days - 1; i >= 0; i--) {
+    const date = new Date(today);
+    date.setDate(today.getDate() - i);
 
-    return labels.map((date, index) => ({
-      date,
-      clicks: Math.round(
-        total * weights[index]
-      ),
-    }));
+    const key = date.toISOString().split("T")[0];
+
+    grouped[key] = {
+      date: date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      }),
+      clicks: 0,
+    };
   }
 
-  if (period === "90days") {
-    const labels = [
-      "Day 1",
-      "Day 15",
-      "Day 30",
-      "Day 45",
-      "Day 60",
-      "Day 75",
-      "Day 90",
-    ];
+  // Count clicks
+  clicks.forEach((click) => {
+    const date = new Date(click.clickedAt);
+    date.setHours(0, 0, 0, 0);
 
-    const weights = [
-      0.06,
-      0.08,
-      0.11,
-      0.13,
-      0.17,
-      0.2,
-      0.25,
-    ];
+    const key = date.toISOString().split("T")[0];
 
-    return labels.map((date, index) => ({
-      date,
-      clicks: Math.round(
-        total * weights[index]
-      ),
-    }));
-  }
+    if (grouped[key]) {
+      grouped[key].clicks++;
+    }
+  });
 
-  const days = [
-    "Mon",
-    "Tue",
-    "Wed",
-    "Thu",
-    "Fri",
-    "Sat",
-    "Sun",
-  ];
-
-  const weights = [
-    0.08,
-    0.1,
-    0.11,
-    0.13,
-    0.15,
-    0.19,
-    0.24,
-  ];
-
-  return days.map((date, index) => ({
-    date,
-    clicks: Math.round(
-      total * weights[index]
-    ),
-  }));
+  return Object.values(grouped);
 }
 
-export default function ClickChart({
-  period = "7days",
-  totalClicks = 0,
-}) {
-  const chartData = createChartData(
-    period,
-    totalClicks
-  );
+export default function ClickChart({ period = "7days", clicks = [] }) {
+  console.log("Current period:", period);
+  const chartData = createChartData(period, clicks);
 
   return (
     <div
@@ -151,10 +95,7 @@ export default function ClickChart({
         height: "290px",
       }}
     >
-      <ResponsiveContainer
-        width="100%"
-        height="100%"
-      >
+      <ResponsiveContainer width="100%" height="100%">
         <AreaChart
           data={chartData}
           margin={{
@@ -172,17 +113,9 @@ export default function ClickChart({
               x2="0"
               y2="1"
             >
-              <stop
-                offset="5%"
-                stopColor="#3b82f6"
-                stopOpacity={0.35}
-              />
+              <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.35} />
 
-              <stop
-                offset="95%"
-                stopColor="#3b82f6"
-                stopOpacity={0}
-              />
+              <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
             </linearGradient>
           </defs>
 
@@ -212,9 +145,7 @@ export default function ClickChart({
             }}
             tickFormatter={(value) => {
               if (value >= 1000) {
-                return `${(
-                  value / 1000
-                ).toFixed(1)}k`;
+                return `${(value / 1000).toFixed(1)}k`;
               }
 
               return value;
