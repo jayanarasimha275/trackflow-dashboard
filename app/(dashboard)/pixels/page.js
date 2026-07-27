@@ -15,6 +15,7 @@ export default function PixelsPage() {
   const [selectedOffer, setSelectedOffer] = useState("");
   const [pixelName, setPixelName] = useState("");
   const [isActive, setIsActive] = useState(true);
+  const [pixelType, setPixelType] = useState("JAVASCRIPT");
   const [pixelCode, setPixelCode] = useState("");
   const [hasPixel, setHasPixel] = useState(false);
 
@@ -47,6 +48,7 @@ export default function PixelsPage() {
       const pixel = response.data;
 
       setPixelName(pixel.pixelName);
+      setPixelType(pixel.pixelType);
       setPixelCode(pixel.pixelCode);
       setIsActive(pixel.isActive);
       setHasPixel(true);
@@ -73,6 +75,7 @@ export default function PixelsPage() {
       if (hasPixel) {
         await updatePixel(selectedOffer, {
           pixelName,
+          pixelType,
           isActive,
         });
 
@@ -81,6 +84,7 @@ export default function PixelsPage() {
         const response = await createPixel({
           linkId: Number(selectedOffer),
           pixelName,
+          pixelType,
           isActive,
         });
 
@@ -166,6 +170,19 @@ export default function PixelsPage() {
             value={pixelName}
             onChange={(e) => setPixelName(e.target.value)}
           />
+        </div>
+        <div className={styles.group}>
+          <label className={styles.label}>Pixel Type</label>
+
+          <select
+            className={styles.select}
+            value={pixelType}
+            onChange={(e) => setPixelType(e.target.value)}
+          >
+            <option value="JAVASCRIPT">JavaScript Pixel</option>
+            <option value="IMAGE">Image Pixel</option>
+            <option value="POSTBACK">Postback URL</option>
+          </select>
         </div>
 
         <div className={styles.group}>
