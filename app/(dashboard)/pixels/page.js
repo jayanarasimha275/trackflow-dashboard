@@ -232,6 +232,25 @@ export default function PixelsPage() {
             placeholder="Pixel code will appear here..."
           />
         </div>
+        {pixelType === "JAVASCRIPT" && (
+          <p className={styles.helpText}>
+            Paste this script before the closing &lt;/body&gt; tag on your conversion
+            page.
+          </p>
+        )}
+
+        {pixelType === "IMAGE" && (
+          <p className={styles.helpText}>
+            Place this image tag on your conversion or thank-you page.
+          </p>
+        )}
+
+        {pixelType === "POSTBACK" && (
+          <p className={styles.helpText}>
+            Replace <strong>{"{CLICK_ID}"}</strong> with the actual click ID and send a
+            GET request to this URL when a conversion occurs.
+          </p>
+        )}
       </div>
     </div>
   );
