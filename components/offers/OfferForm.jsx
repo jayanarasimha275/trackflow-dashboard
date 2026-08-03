@@ -82,7 +82,11 @@ export default function OfferForm({
     try {
       setLoading(true);
 
-      const offer = await createOffer(formData);
+      if (mode === "edit") {
+        await updateOffer(initialData.id, formData);
+      } else {
+        await createOffer(formData);
+      }
 
       router.push("/offers");
     } catch (error) {

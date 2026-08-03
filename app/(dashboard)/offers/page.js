@@ -51,7 +51,10 @@ export default function OffersPage() {
           Loading offers...
         </div>
       ) : (
-        <OfferTable offers={offers} />
+        <OfferTable
+          offers={offers}
+          onRefresh={loadOffers}
+        />
       )}
     </div>
   );

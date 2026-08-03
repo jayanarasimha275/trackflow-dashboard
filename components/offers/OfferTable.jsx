@@ -3,8 +3,30 @@
 import Link from "next/link";
 import { Eye, Pencil, Trash2 } from "lucide-react";
 
-export default function OfferTable({ offers = [] }) {
-  if (offers.length === 0) {
+import { deleteOffer } from "@/services/offerService";
+
+export default function OfferTable({
+  offers = [],
+  onRefresh,
+}) {
+  async function handleDelete(id) {
+    const ok = window.confirm(
+      "Are you sure you want to delete this offer?"
+    );
+
+    if (!ok) return;
+
+    try {
+      await deleteOffer(id);
+
+      if (onRefresh) {
+        await onRefresh();
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Failed to delete offer.");
+    }
+  }  if (offers.length === 0) {
     return (
       <div className="rounded-3xl border border-slate-800 bg-[#111827] py-16 text-center">
         <h3 className="text-xl font-semibold text-white">
@@ -93,7 +115,10 @@ export default function OfferTable({ offers = [] }) {
                     <Pencil size={18} />
                   </Link>
 
-                  <button className="rounded-lg p-2 text-red-400 transition hover:bg-slate-800">
+                  <button
+                    onClick={() => handleDelete(offer.id)}
+                    className="rounded-lg p-2 text-red-400 transition hover:bg-slate-800 hover:text-red-300"
+                  >
                     <Trash2 size={18} />
                   </button>
                 </div>
