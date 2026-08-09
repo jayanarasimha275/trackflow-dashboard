@@ -29,3 +29,7 @@ export const deleteCampaign = (id) => {
     method: "DELETE",
   });
 };
+
+export const getCampaignTrackingUrl = (trackingCode) => {
+  return `${BASE}/track/${trackingCode}`;
+};

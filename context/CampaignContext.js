@@ -84,7 +84,9 @@ export function useCampaigns() {
   const context = useContext(CampaignContext);
 
   if (!context) {
-    throw new Error("useCampaigns must be used inside CampaignProvider");
+    throw new Error(
+      "useCampaigns must be used inside CampaignProvider"
+    );
   }
 
   return context;
