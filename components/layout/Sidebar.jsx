@@ -10,6 +10,10 @@ import {
   Settings,
   LogOut,
   ScanLine,
+  Megaphone,
+  Tag,
+  Users,
+  Building2,
 } from "lucide-react";
 
 import styles from "./Sidebar.module.css";
@@ -38,6 +42,26 @@ const menuItems = [
         name: "Links",
         href: "/links",
         icon: Link2,
+      },
+      {
+        name: "Campaigns",
+        href: "/campaigns",
+        icon: Megaphone,
+      },
+      {
+        name: "Offers",
+        href: "/offers",
+        icon: Tag,
+      },
+      {
+        name: "Advertisers",
+        href: "/advertisers",
+        icon: Building2,
+      },
+      {
+        name: "Publishers",
+        href: "/publishers",
+        icon: Users,
       },
       {
         name: "Pixels",

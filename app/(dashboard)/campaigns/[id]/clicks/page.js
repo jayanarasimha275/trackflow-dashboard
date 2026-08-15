@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { useState } from "react";
 import {
   ArrowLeft,
   MousePointerClick,
@@ -14,10 +15,19 @@ import {
 } from "lucide-react";
 
 import styles from "./page.module.css";
+import { useCampaigns } from "@/context/CampaignContext";
 
 export default function CampaignClicksPage() {
   const params = useParams();
   const campaignId = params?.id;
+
+  const { campaigns, loaded } = useCampaigns();
+
+  const campaign = campaigns.find(
+    (item) => String(item.id) === String(campaignId)
+  );
+  const [search, setSearch] = useState("");
+  const [clicks, setClicks] = useState([]);
 
   return (
     <main className={styles.page}>
@@ -61,25 +71,25 @@ export default function CampaignClicksPage() {
         <StatCard
           icon={<MousePointerClick size={19} />}
           label="Total Clicks"
-          value="0"
+          value={campaign?.clicks ?? 0}
         />
 
         <StatCard
           icon={<Monitor size={19} />}
           label="Desktop"
-          value="0"
+          value={campaign?.desktopClicks ?? 0}
         />
 
         <StatCard
           icon={<Smartphone size={19} />}
           label="Mobile"
-          value="0"
+          value={campaign?.mobileClicks ?? 0}
         />
 
         <StatCard
           icon={<Tablet size={19} />}
           label="Tablet"
-          value="0"
+          value={campaign?.tabletClicks ?? 0}
         />
       </section>
 
@@ -91,6 +101,8 @@ export default function CampaignClicksPage() {
             <input
               type="text"
               placeholder="Search clicks..."
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
             />
           </div>
 
@@ -115,22 +127,59 @@ export default function CampaignClicksPage() {
             </thead>
 
             <tbody>
-              <tr>
-                <td colSpan="7">
-                  <div className={styles.empty}>
-                    <div className={styles.emptyIcon}>
-                      <MousePointerClick size={29} />
+              {clicks.length === 0 ? (
+                <tr>
+                  <td colSpan="7">
+                    <div className={styles.empty}>
+                      <div className={styles.emptyIcon}>
+                        <MousePointerClick size={29} />
+                      </div>
+
+                      <h2>No clicks yet</h2>
+
+                      <p>
+                        Click activity will appear here when visitors use
+                        this campaign's tracking link.
+                      </p>
                     </div>
+                  </td>
+                </tr>
+              ) : (
+                clicks
+                  .filter((click) => {
+                    const query = search.toLowerCase();
 
-                    <h2>No clicks yet</h2>
+                    return (
+                      click.id?.toLowerCase().includes(query) ||
+                      click.country?.toLowerCase().includes(query) ||
+                      click.browser?.toLowerCase().includes(query) ||
+                      click.referrer?.toLowerCase().includes(query)
+                    );
+                  })
+                  .map((click) => (
+                    <tr key={click.id}>
+                      <td>
+                        <code>{click.id}</code>
+                      </td>
 
-                    <p>
-                      Click activity will appear here when
-                      visitors use this campaign's tracking link.
-                    </p>
-                  </div>
-                </td>
-              </tr>
+                      <td>{click.deviceType || "—"}</td>
+
+                      <td>{click.browser || "—"}</td>
+
+                      <td>{click.operatingSystem || "—"}</td>
+
+                      <td>{click.country || "—"}</td>
+
+                      <td>{click.referrer || "Direct"}</td>
+
+                      <td>
+                        {click.clickedAt
+                          ? new Date(click.clickedAt).toLocaleString()
+                          : "—"}
+                      </td>
+                    </tr>
+                  ))
+              )}
             </tbody>
           </table>
         </div>

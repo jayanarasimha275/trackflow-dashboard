@@ -19,13 +19,12 @@ import {
 } from "lucide-react";
 
 import styles from "./page.module.css";
-import { useCampaigns } from "@/context/CampaignContext";
-
-export default function CampaignsPage() {
+import { useCampaigns } from "@/context/CampaignContext";export default function CampaignsPage() {
   const {
     campaigns,
     loaded,
     deleteCampaign,
+    updateCampaign,
   } = useCampaigns();
 
   const [search, setSearch] = useState("");
@@ -266,7 +265,12 @@ export default function CampaignsPage() {
                           </div>
 
                           <div>
-                            <strong>{campaign.name}</strong>
+                            <Link
+                              href={`/campaigns/${campaign.id}`}
+                              className={styles.campaignLink}
+                            >
+                              {campaign.name}
+                            </Link>
 
                             <small>
                               {campaign.trackingCode || "No tracking code"}
@@ -377,18 +381,61 @@ export default function CampaignsPage() {
                               </button>
 
                               {campaign.status === "ACTIVE" ? (
-                                <button>
+                                <button
+                                  onClick={async () => {
+                                    try {
+                                      await updateCampaign(campaign.id, {
+                                        status: "PAUSED",
+                                      });
+
+                                      setOpenMenu(null);
+                                    } catch (error) {
+                                      console.error("Failed to pause campaign:", error);
+                                      alert(error.message || "Failed to pause campaign.");
+                                    }
+                                  }}
+                                >
                                   <Pause size={15} />
                                   Pause campaign
                                 </button>
                               ) : (
-                                <button>
+                                <button
+                                  onClick={async () => {
+                                    try {
+                                      await updateCampaign(campaign.id, {
+                                        status: "ACTIVE",
+                                      });
+
+                                      setOpenMenu(null);
+                                    } catch (error) {
+                                      console.error("Failed to activate campaign:", error);
+                                      alert(error.message || "Failed to activate campaign.");
+                                    }
+                                  }}
+                                >
                                   <Play size={15} />
                                   Activate campaign
                                 </button>
                               )}
 
-                              <button className={styles.deleteAction}>
+                              <button
+                                className={styles.deleteAction}
+                                onClick={async () => {
+                                  const confirmed = window.confirm(
+                                    `Delete "${campaign.name}"? This action cannot be undone.`
+                                  );
+
+                                  if (!confirmed) return;
+
+                                  try {
+                                    await deleteCampaign(campaign.id);
+                                    setOpenMenu(null);
+                                  } catch (error) {
+                                    console.error("Failed to delete campaign:", error);
+                                    alert(error.message || "Failed to delete campaign.");
+                                  }
+                                }}
+                              >
                                 <Trash2 size={15} />
                                 Delete campaign
                               </button>

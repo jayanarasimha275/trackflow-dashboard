@@ -152,8 +152,31 @@ export default function OfferForm({
 
         <OfferButtons
           loading={loading}
+          mode={mode}
           onCancel={() => router.push("/offers")}
-          onSaveDraft={() => console.log("Save Draft")}
+          onSaveDraft={async () => {
+            try {
+              setLoading(true);
+
+              const draftData = {
+                ...formData,
+                status: "DRAFT",
+              };
+
+              if (mode === "edit") {
+                await updateOffer(initialData.id, draftData);
+              } else {
+                await createOffer(draftData);
+              }
+
+              router.push("/offers");
+            } catch (error) {
+              console.error(error);
+              alert(error.message || "Failed to save draft.");
+            } finally {
+              setLoading(false);
+            }
+          }}
         />
       </div>
 

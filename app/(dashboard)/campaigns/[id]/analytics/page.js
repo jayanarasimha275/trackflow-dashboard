@@ -14,11 +14,18 @@ import {
 } from "lucide-react";
 
 import styles from "./page.module.css";
+import { useCampaigns } from "@/context/CampaignContext";
 
 export default function CampaignAnalyticsPage() {
   const params = useParams();
 
   const campaignId = params?.id;
+
+  const { campaigns, loaded } = useCampaigns();
+
+  const campaign = campaigns.find(
+    (item) => String(item.id) === String(campaignId)
+  );
 
   return (
     <main className={styles.page}>
@@ -62,29 +69,41 @@ export default function CampaignAnalyticsPage() {
         <StatCard
           icon={<MousePointerClick size={19} />}
           label="Clicks"
-          value="0"
-          change="No data yet"
+          value={campaign?.clicks ?? 0}
+          change={campaign?.clicks > 0 ? "Tracking active" : "No data yet"}
         />
 
         <StatCard
           icon={<Users size={19} />}
           label="Unique Visitors"
-          value="0"
-          change="No data yet"
+          value={campaign?.uniqueVisitors ?? 0}
+          change={
+            campaign?.uniqueVisitors > 0
+              ? "Visitors recorded"
+              : "No data yet"
+          }
         />
 
         <StatCard
           icon={<Target size={19} />}
           label="Conversions"
-          value="0"
-          change="No data yet"
+          value={campaign?.conversions ?? 0}
+          change={
+            campaign?.conversions > 0
+              ? "Conversions recorded"
+              : "No data yet"
+          }
         />
 
         <StatCard
           icon={<IndianRupee size={19} />}
           label="Revenue"
-          value="₹0.00"
-          change="No data yet"
+          value={`₹${Number(campaign?.revenue ?? 0).toFixed(2)}`}
+          change={
+            Number(campaign?.revenue ?? 0) > 0
+              ? "Revenue generated"
+              : "No data yet"
+          }
         />
       </section>
 
@@ -103,11 +122,16 @@ export default function CampaignAnalyticsPage() {
             <div className={styles.chartEmpty}>
               <BarChart3 size={30} />
 
-              <strong>No click data yet</strong>
+              <strong>
+                {campaign?.clicks > 0
+                  ? `${campaign.clicks} clicks recorded`
+                  : "No click data yet"}
+              </strong>
 
               <span>
-                Campaign traffic will appear here once visitors
-                start using the tracking link.
+                {campaign?.clicks > 0
+                  ? "Campaign traffic has been recorded."
+                  : "Campaign traffic will appear here once visitors start using the tracking link."}
               </span>
             </div>
           </div>
@@ -127,11 +151,16 @@ export default function CampaignAnalyticsPage() {
             <div className={styles.chartEmpty}>
               <Target size={30} />
 
-              <strong>No conversions yet</strong>
+              <strong>
+                {campaign?.conversions > 0
+                  ? `${campaign.conversions} conversions recorded`
+                  : "No conversions yet"}
+              </strong>
 
               <span>
-                Conversion statistics will appear after the first
-                conversion.
+                {campaign?.conversions > 0
+                  ? "Conversion activity has been recorded for this campaign."
+                  : "Conversion statistics will appear after the first conversion."}
               </span>
             </div>
           </div>
@@ -149,19 +178,19 @@ export default function CampaignAnalyticsPage() {
         <div className={styles.breakdown}>
           <Breakdown
             label="Desktop"
-            value="0"
+            value="—"
             percentage="0%"
           />
 
           <Breakdown
             label="Mobile"
-            value="0"
+            value="—"
             percentage="0%"
           />
 
           <Breakdown
             label="Tablet"
-            value="0"
+            value="—"
             percentage="0%"
           />
         </div>
@@ -178,22 +207,44 @@ export default function CampaignAnalyticsPage() {
         <div className={styles.metrics}>
           <Metric
             label="Conversion Rate"
-            value="0.00%"
+            value={
+              campaign?.clicks > 0
+                ? `${(
+                    (Number(campaign?.conversions ?? 0) /
+                      Number(campaign.clicks)) *
+                    100
+                  ).toFixed(2)}%`
+                : "0.00%"
+            }
           />
 
           <Metric
             label="Click Through Rate"
-            value="0.00%"
+            value="N/A"
           />
 
           <Metric
             label="Earnings Per Click"
-            value="₹0.00"
+            value={
+              campaign?.clicks > 0
+                ? `₹${(
+                    Number(campaign?.revenue ?? 0) /
+                    Number(campaign.clicks)
+                  ).toFixed(2)}`
+                : "₹0.00"
+            }
           />
 
           <Metric
             label="Revenue Per Visitor"
-            value="₹0.00"
+            value={
+              campaign?.uniqueVisitors > 0
+                ? `₹${(
+                    Number(campaign?.revenue ?? 0) /
+                    Number(campaign.uniqueVisitors)
+                  ).toFixed(2)}`
+                : "₹0.00"
+            }
           />
         </div>
       </section>

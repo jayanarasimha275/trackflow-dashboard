@@ -17,6 +17,7 @@ export default function PublishersPage() {
   const [publishers, setPublishers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [deletingId, setDeletingId] = useState(null);
 
   useEffect(() => {
     loadPublishers();
@@ -43,6 +44,41 @@ export default function PublishersPage() {
     }
   }
 
+  async function handleDeletePublisher(publisher) {
+    const confirmed = window.confirm(
+      `Delete "${publisher.firstName} ${publisher.lastName}"? This action cannot be undone.`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setDeletingId(publisher.id);
+
+      const response = await fetch(
+        `${API_BASE_URL}/publishers/${publisher.id}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          result.message || "Failed to delete publisher."
+        );
+      }
+
+      setPublishers((current) =>
+        current.filter((item) => item.id !== publisher.id)
+      );
+    } catch (error) {
+      console.error("Failed to delete publisher:", error);
+      alert(error.message || "Failed to delete publisher.");
+    } finally {
+      setDeletingId(null);
+    }
+  }
   const filteredPublishers = publishers.filter((publisher) => {
     const name =
       `${publisher.firstName || ""} ${publisher.lastName || ""}`.toLowerCase();
@@ -245,12 +281,24 @@ export default function PublishersPage() {
 
                     <td>
                       <div className={styles.actions}>
-                        <button title="Edit">
+                        <Link
+                          href={`/publishers/${publisher.id}/edit`}
+                          className={styles.actionButton}
+                          title="Edit"
+                        >
                           <Pencil size={16} />
-                        </button>
+                        </Link>
 
-                        <button title="More">
-                          <MoreHorizontal size={18} />
+                        <button
+                          title="Delete"
+                          onClick={() => handleDeletePublisher(publisher)}
+                          disabled={deletingId === publisher.id}
+                        >
+                          {deletingId === publisher.id ? (
+                            <span className={styles.buttonSpinner} />
+                          ) : (
+                            <MoreHorizontal size={18} />
+                          )}
                         </button>
                       </div>
                     </td>

@@ -6,6 +6,7 @@ export default function OfferButtons({
   onCancel,
   onSaveDraft,
   loading,
+  mode = "create",
 }) {
   return (
     <div className="sticky bottom-0 z-20 mt-8 flex flex-wrap items-center justify-end gap-4 rounded-3xl border border-slate-800 bg-[#111827]/95 p-5 backdrop-blur">
@@ -33,7 +34,13 @@ export default function OfferButtons({
         className="flex items-center gap-2 rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
       >
         <Send size={18} />
-        {loading ? "Creating..." : "Create Offer"}
+        {loading
+          ? mode === "edit"
+            ? "Saving..."
+            : "Creating..."
+          : mode === "edit"
+            ? "Save Changes"
+            : "Create Offer"}
       </button>
     </div>
   );

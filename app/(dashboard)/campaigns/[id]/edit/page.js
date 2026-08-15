@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { getOffers } from "@/services/offerService";
+import { getPublishers } from "@/services/publisherService";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -11,13 +13,25 @@ import {
 } from "lucide-react";
 
 import styles from "./page.module.css";
+import { useCampaigns } from "@/context/CampaignContext";
 
 export default function EditCampaignPage() {
   const params = useParams();
   const router = useRouter();
+  const {
+    campaigns,
+    loaded,
+    updateCampaign,
+  } = useCampaigns();
+
+  const campaign = campaigns.find(
+    (item) => String(item.id) === String(params.id)
+  );
 
   const [form, setForm] = useState({
-    name: "Campaign Name",
+    name: "",
+    offerId: "",
+    publisherId: "",
     status: "ACTIVE",
     trafficSource: "",
     trackingDomain: "",
@@ -26,6 +40,58 @@ export default function EditCampaignPage() {
   });
 
   const [loading, setLoading] = useState(false);
+  const [offers, setOffers] = useState([]);
+  const [publishers, setPublishers] = useState([]);
+  const [loadingData, setLoadingData] = useState(true);
+  useEffect(() => {
+    if (!loaded || !campaign) return;
+
+    async function loadOptions() {
+      try {
+        setLoadingData(true);
+
+        const [offersResponse, publishersResponse] =
+          await Promise.all([
+            getOffers(),
+            getPublishers(),
+          ]);
+
+        const offersData = Array.isArray(offersResponse)
+          ? offersResponse
+          : offersResponse?.data || [];
+
+        const publishersData = Array.isArray(publishersResponse)
+          ? publishersResponse
+          : publishersResponse?.data || [];
+
+        setOffers(offersData);
+        setPublishers(publishersData);
+
+        setForm({
+          name: campaign.name || "",
+          offerId: campaign.offerId || campaign.offer?.id || "",
+          publisherId:
+            campaign.publisherId ||
+            campaign.publisher?.id ||
+            "",
+          status: campaign.status || "ACTIVE",
+          trafficSource: campaign.trafficSource || "",
+          trackingDomain: campaign.trackingDomain || "",
+          dailyCap: campaign.dailyCap ?? 0,
+          totalCap: campaign.totalCap ?? 0,
+        });
+      } catch (error) {
+        console.error(
+          "Failed to load campaign options:",
+          error
+        );
+      } finally {
+        setLoadingData(false);
+      }
+    }
+
+    loadOptions();
+  }, [loaded, campaign]);
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -39,14 +105,37 @@ export default function EditCampaignPage() {
   async function handleSubmit(event) {
     event.preventDefault();
 
-    setLoading(true);
 
-    // API connection will be added after all frontend pages are complete.
-    await new Promise((resolve) => setTimeout(resolve, 700));
+    if (!form.name.trim()) {
+      alert("Campaign name is required.");
+      return;
+    }
 
-    setLoading(false);
+    if (!form.offerId) {
+      alert("Please select an offer.");
+      return;
+    }
 
-    router.push(`/campaigns/${params.id}`);
+    if (!form.publisherId) {
+      alert("Please select a publisher.");
+      return;
+    }
+    try {
+      setLoading(true);
+
+      await updateCampaign(params.id, {
+        ...form,
+        dailyCap: Number(form.dailyCap || 0),
+        totalCap: Number(form.totalCap || 0),
+      });
+
+      router.push(`/campaigns/${params.id}`);
+    } catch (error) {
+      console.error("Failed to update campaign:", error);
+      alert(error.message || "Failed to update campaign.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -96,6 +185,58 @@ export default function EditCampaignPage() {
                   placeholder="e.g. Summer Sale Campaign"
                   required
                 />
+              </div>
+
+              <div className={styles.field}>
+                <label>
+                  Offer <span>*</span>
+                </label>
+
+                <select
+                  name="offerId"
+                  value={form.offerId}
+                  onChange={handleChange}
+                  disabled={loadingData}
+                  required
+                >
+                  <option value="">
+                    {loadingData
+                      ? "Loading offers..."
+                      : "Select an offer"}
+                  </option>
+
+                  {offers.map((offer) => (
+                    <option key={offer.id} value={offer.id}>
+                      {offer.offerName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className={styles.field}>
+                <label>
+                  Publisher <span>*</span>
+                </label>
+
+                <select
+                  name="publisherId"
+                  value={form.publisherId}
+                  onChange={handleChange}
+                  disabled={loadingData}
+                  required
+                >
+                  <option value="">
+                    {loadingData
+                      ? "Loading publishers..."
+                      : "Select a publisher"}
+                  </option>
+
+                  {publishers.map((publisher) => (
+                    <option key={publisher.id} value={publisher.id}>
+                      {publisher.firstName} {publisher.lastName}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className={styles.field}>

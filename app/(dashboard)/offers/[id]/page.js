@@ -61,6 +61,21 @@ export default function OfferDetailsPage() {
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Link
+            href="/offers"
+            className="rounded-xl border border-slate-700 px-4 py-2 text-sm font-medium text-slate-300 transition hover:bg-slate-800"
+          >
+            Back to Offers
+          </Link>
+
+          <Link
+            href={`/offers/edit/${offer.id}`}
+            className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700"
+          >
+            Edit Offer
+          </Link>
+        </div>
         <div>
           <h1 className="text-3xl font-bold text-white">
             {offer.offerName}

@@ -1,14 +1,19 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
-
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+} from "react";
 import {
   getCampaigns as fetchAllCampaigns,
+  getCampaign as fetchCampaignAPI,
   createCampaign as createCampaignAPI,
   updateCampaign as updateCampaignAPI,
   deleteCampaign as deleteCampaignAPI,
 } from "@/services/campaignService";
-
 const CampaignContext = createContext(null);
 
 export function CampaignProvider({ children }) {
@@ -57,11 +62,11 @@ export function CampaignProvider({ children }) {
     return result;
   }
 
-  function getCampaign(id) {
-    return campaigns.find(
-      (campaign) => String(campaign.id) === String(id)
-    );
-  }
+  const getCampaign = useCallback(async (id) => {
+    const result = await fetchCampaignAPI(id);
+
+    return result.data || result;
+  }, []);
 
   const value = {
     campaigns,

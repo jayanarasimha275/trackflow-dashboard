@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { useState } from "react";
 import {
   ArrowLeft,
   Target,
@@ -14,11 +15,20 @@ import {
 } from "lucide-react";
 
 import styles from "./page.module.css";
+import { useCampaigns } from "@/context/CampaignContext";
 
 export default function CampaignConversionsPage() {
   const params = useParams();
 
   const campaignId = params?.id;
+
+  const { campaigns, loaded } = useCampaigns();
+
+  const campaign = campaigns.find(
+    (item) => String(item.id) === String(campaignId)
+  );
+  const [search, setSearch] = useState("");
+  const [conversions, setConversions] = useState([]);
 
   return (
     <main className={styles.page}>
@@ -66,7 +76,7 @@ export default function CampaignConversionsPage() {
 
           <div>
             <span>Total Conversions</span>
-            <strong>0</strong>
+            <strong>{campaign?.conversions ?? 0}</strong>
           </div>
         </div>
 
@@ -112,6 +122,8 @@ export default function CampaignConversionsPage() {
             <input
               type="text"
               placeholder="Search conversions..."
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
             />
           </div>
 
@@ -121,18 +133,77 @@ export default function CampaignConversionsPage() {
           </div>
         </div>
 
-        <div className={styles.empty}>
-          <div className={styles.emptyIcon}>
-            <Target size={30} />
+        {conversions.length === 0 ? (
+          <div className={styles.empty}>
+            <div className={styles.emptyIcon}>
+              <Target size={30} />
+            </div>
+
+            <h2>No conversions yet</h2>
+
+            <p>
+              Conversions will appear here when visitors complete
+              the campaign action.
+            </p>
           </div>
+        ) : (
+          <div className={styles.tableWrapper}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>Conversion ID</th>
+                  <th>Click ID</th>
+                  <th>Status</th>
+                  <th>Revenue</th>
+                  <th>Payout</th>
+                  <th>Time</th>
+                </tr>
+              </thead>
 
-          <h2>No conversions yet</h2>
+              <tbody>
+                {conversions
+                  .filter((conversion) => {
+                    const query = search.toLowerCase();
 
-          <p>
-            Conversions will appear here when visitors complete
-            the campaign action.
-          </p>
-        </div>
+                    return (
+                      conversion.id?.toLowerCase().includes(query) ||
+                      conversion.clickId?.toLowerCase().includes(query) ||
+                      conversion.status?.toLowerCase().includes(query)
+                    );
+                  })
+                  .map((conversion) => (
+                    <tr key={conversion.id}>
+                      <td>
+                        <code>{conversion.id}</code>
+                      </td>
+
+                      <td>
+                        <code>{conversion.clickId || "—"}</code>
+                      </td>
+
+                      <td>{conversion.status || "Approved"}</td>
+
+                      <td>
+                        ₹{Number(conversion.revenue || 0).toFixed(2)}
+                      </td>
+
+                      <td>
+                        ₹{Number(conversion.payout || 0).toFixed(2)}
+                      </td>
+
+                      <td>
+                        {conversion.createdAt
+                          ? new Date(
+                              conversion.createdAt
+                            ).toLocaleString()
+                          : "—"}
+                      </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </section>
     </main>
   );

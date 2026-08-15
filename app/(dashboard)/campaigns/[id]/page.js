@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import {
@@ -21,13 +22,64 @@ export default function CampaignDetailsPage() {
   const params = useParams();
 
   const campaignId = params?.id;
-  const { campaigns, loaded } = useCampaigns();
+  const { getCampaign } = useCampaigns();
 
-  const campaign = campaigns.find(
-    (item) => String(item.id) === String(campaignId)
-  );
+  const [campaign, setCampaign] = useState(null);
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    if (!campaignId) return;
+
+    async function loadCampaign() {
+      try {
+        setLoading(true);
+
+        const data = await getCampaign(campaignId);
+
+        setCampaign(data);
+      } catch (error) {
+        console.error("Failed to load campaign:", error);
+        setCampaign(null);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadCampaign();
+  }, [campaignId, getCampaign]);
+
+  if (loading) {
+    return (
+      <main className={styles.page}>
+        <div className={styles.empty}>
+          Loading campaign...
+        </div>
+      </main>
+    );
+  }
+
+  if (!campaign) {
+    return (
+      <main className={styles.page}>
+        <div className={styles.empty}>
+          <h2>Campaign not found</h2>
+
+          <p>
+            The campaign may have been deleted or does not exist.
+          </p>
+
+          <Link
+            href="/campaigns"
+            className={styles.secondaryButton}
+          >
+            Back to Campaigns
+          </Link>
+        </div>
+      </main>
+    );
+  }
   return (
+
     <main className={styles.page}>
       <div className={styles.topbar}>
         <Link href="/campaigns" className={styles.back}>
